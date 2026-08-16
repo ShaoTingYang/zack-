@@ -1,0 +1,16 @@
+j.robert.wei@CrisisJungle-2 一路向哪？ % npm run dev
+
+> travel-story-gift@1.0.0 dev
+> vite
+
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-nod
+e-api-deprecated for more details.
+
+  VITE v5.4.19  ready in 148 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+cd /Users/j.robert.wei/Desktop/一路向哪？
+npm run dev
