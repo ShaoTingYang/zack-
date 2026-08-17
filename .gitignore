@@ -100,3 +100,6 @@ dist/
 # Local photos and uploads
 public/images/cities/
 uploads/
+
+.vercel
+.env*

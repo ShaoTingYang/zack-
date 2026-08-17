@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import PlanetDetailModal from './energy/PlanetDetailModal'; // Adjust path if needed
 
-const KEYWORDS = ["求索", "真实", "专注", "减负", "在场", "思考", "投入"];
+const KEYWORDS = ["积极向上", "不要熬夜", "专注", "学习提升", "旅行表现", "思考", "迈入婚姻殿堂"];
 
 // Planet Assets Configuration - Reduced Sizes
 const PLANET_ASSETS = [

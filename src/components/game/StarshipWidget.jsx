@@ -18,13 +18,13 @@ export default function StarshipWidget() {
 
     // Define Planet display order and naming
     const PLANET_ORDER = [
-        { key: '求索', name: '求索星' },
-        { key: '真实', name: '真实星' },
+        { key: '积极向上', name: '积极向上星' },
+        { key: '不要熬夜', name: '不要熬夜星' },
         { key: '专注', name: '专注星' },
-        { key: '减负', name: '减负星' },
+        { key: '学习提升', name: '学习提升星' },
         { key: '思考', name: '思考星' },
-        { key: '在场', name: '在场星' },
-        { key: '投入', name: '投入星' }
+        { key: '旅行表现', name: '旅行表现星' },
+        { key: '迈入婚姻殿堂', name: '迈入婚姻殿堂星' }
     ];
 
     return (

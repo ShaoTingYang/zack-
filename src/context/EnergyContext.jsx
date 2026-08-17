@@ -9,12 +9,12 @@ export const USERS = {
     JIANG: {
         id: 'jiang',
         name: '杨少霆',
-        keywords: ['专注', '求索', '真实']
+        keywords: ['专注', '积极向上', '不要熬夜']
     },
     ZHEN: {
         id: 'zhen',
         name: '方思怡',
-        keywords: ['思考', '减负', '在场', '投入']
+        keywords: ['思考', '学习提升', '旅行表现', '迈入婚姻殿堂']
     }
 };
 
@@ -30,13 +30,13 @@ const BASE_BOOST = 5; // Base points added per check-in points
 
 // Planet Metadata
 export const PLANET_METADATA = {
-    '求索': { en: 'Questing', desc: 'Maintain curiosity about the world and explore the unknown. Keep asking questions.' },
-    '真实': { en: 'Authenticity', desc: 'Face the true self and the world. Be honest and transparent.' },
+    '积极向上': { en: 'Questing', desc: 'Maintain curiosity about the world and explore the unknown. Keep asking questions.' },
+    '不要熬夜': { en: 'Authenticity', desc: 'Face the true self and the world. Be honest and transparent.' },
     '专注': { en: 'Focus', desc: 'eliminate distractions and devote yourself wholeheartedly to the present moment.' },
-    '减负': { en: 'Declutter', desc: 'Timely clean up physical and mental burdens. Travel light.' },
+    '学习提升': { en: 'Declutter', desc: 'Timely clean up physical and mental burdens. Travel light.' },
     '思考': { en: 'Thinking', desc: 'Think deeply and independently. Do not follow the crowd blindly.' },
-    '在场': { en: 'Presence', desc: 'Be here, now. Fully engage with the current experience.' },
-    '投入': { en: 'Commitment', desc: 'Once a choice is made, go all in. No hesitation.' }
+    '旅行表现': { en: 'Presence', desc: 'Be here, now. Fully engage with the current experience.' },
+    '迈入婚姻殿堂': { en: 'Commitment', desc: 'Once a choice is made, go all in. No hesitation.' }
 };
 
 export function EnergyProvider({ children }) {
