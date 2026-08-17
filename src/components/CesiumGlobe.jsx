@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as Cesium from 'cesium';
 import { motion, AnimatePresence, useMotionValueEvent, useMotionValue } from 'framer-motion';
+import HandGestureControl from './HandGestureControl';
 
 
 export default function CesiumGlobe({ goTo, goToCity, transitionMode = false, scrollProgress = 0, scrollY: scrollYProp, activeStage = -1, stageAnimating = true, onUserInteract, cityPoints: cityPointsProp = [] }) {
@@ -1647,6 +1648,8 @@ export default function CesiumGlobe({ goTo, goToCity, transitionMode = false, sc
           </div>
         </motion.div>
       )}
+
+      {!transitionMode && <HandGestureControl viewerRef={viewer} />}
     </div>
   );
-} 
+}
