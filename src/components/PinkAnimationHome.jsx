@@ -161,12 +161,16 @@ export default function PinkAnimationHome({ goTo, goToCity, isCityMode = false, 
     // ========= User Interaction Handler =========
     const handleUserInteract = useCallback(() => {
         if (isCityMode) return;
-        // Stop animation and carousel
+        // Stop animation and carousel permanently once the user takes manual control
+        // (no auto-resume after inactivity — the user's view should stick)
+        carouselKilledByClick.current = true;
         setIsAnimating(false);
         stopCarousel();
-        // Start inactivity timer
-        startInactivityTimer();
-    }, [isCityMode, stopCarousel, startInactivityTimer]);
+        if (inactivityTimerRef.current) {
+            clearTimeout(inactivityTimerRef.current);
+            inactivityTimerRef.current = null;
+        }
+    }, [isCityMode, stopCarousel]);
 
     // ========= Dot Click Handler =========
     const handleStageClick = useCallback((index) => {

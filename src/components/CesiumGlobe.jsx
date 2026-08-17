@@ -1649,7 +1649,7 @@ export default function CesiumGlobe({ goTo, goToCity, transitionMode = false, sc
         </motion.div>
       )}
 
-      {!transitionMode && <HandGestureControl viewerRef={viewer} />}
+      {!transitionMode && <HandGestureControl viewerRef={viewer} onUserInteract={onUserInteract} />}
     </div>
   );
 }

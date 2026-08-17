@@ -9,7 +9,12 @@ const PALM_LANDMARK_INDEX = 9;
 const ROTATE_SENSITIVITY = 4.0;
 const MAX_ROTATE_PER_FRAME = 0.05;
 
-export default function HandGestureControl({ viewerRef }) {
+// Exponential smoothing factor for the tracked palm position (higher = smoother but laggier)
+const SMOOTHING = 0.7;
+// Ignore movement smaller than this (normalized units) — filters out hand-tracking jitter
+const DEAD_ZONE = 0.0025;
+
+export default function HandGestureControl({ viewerRef, onUserInteract }) {
     const [enabled, setEnabled] = useState(false);
     const [status, setStatus] = useState('idle'); // idle | loading | tracking | error
     const [errorMsg, setErrorMsg] = useState('');
@@ -18,7 +23,7 @@ export default function HandGestureControl({ viewerRef }) {
     const streamRef = useRef(null);
     const landmarkerRef = useRef(null);
     const rafRef = useRef(null);
-    const lastPalmRef = useRef(null);
+    const smoothedPalmRef = useRef(null);
 
     const stop = useCallback(() => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -27,7 +32,7 @@ export default function HandGestureControl({ viewerRef }) {
             streamRef.current.getTracks().forEach(track => track.stop());
             streamRef.current = null;
         }
-        lastPalmRef.current = null;
+        smoothedPalmRef.current = null;
         setStatus('idle');
     }, []);
 
@@ -42,38 +47,56 @@ export default function HandGestureControl({ viewerRef }) {
         const results = landmarker.detectForVideo(video, performance.now());
 
         if (results.landmarks && results.landmarks.length > 0) {
-            const palm = results.landmarks[0][PALM_LANDMARK_INDEX];
+            const rawPalm = results.landmarks[0][PALM_LANDMARK_INDEX];
             setStatus('tracking');
 
-            if (lastPalmRef.current) {
+            const prevSmoothed = smoothedPalmRef.current;
+            // Exponential moving average to smooth out raw landmark jitter
+            const palm = prevSmoothed
+                ? {
+                    x: prevSmoothed.x * SMOOTHING + rawPalm.x * (1 - SMOOTHING),
+                    y: prevSmoothed.y * SMOOTHING + rawPalm.y * (1 - SMOOTHING),
+                }
+                : { x: rawPalm.x, y: rawPalm.y };
+
+            if (prevSmoothed) {
                 // Mirror horizontal movement (video is mirrored like a selfie cam)
-                const dx = lastPalmRef.current.x - palm.x;
-                const dy = palm.y - lastPalmRef.current.y;
+                let dx = prevSmoothed.x - palm.x;
+                let dy = palm.y - prevSmoothed.y;
 
-                const viewer = viewerRef.current;
-                if (viewer) {
-                    const rotateX = Cesium.Math.clamp(dx * ROTATE_SENSITIVITY, -MAX_ROTATE_PER_FRAME, MAX_ROTATE_PER_FRAME);
-                    const rotateY = Cesium.Math.clamp(dy * ROTATE_SENSITIVITY, -MAX_ROTATE_PER_FRAME, MAX_ROTATE_PER_FRAME);
+                if (Math.abs(dx) < DEAD_ZONE) dx = 0;
+                if (Math.abs(dy) < DEAD_ZONE) dy = 0;
 
-                    if (rotateX > 0) viewer.camera.rotateRight(rotateX);
-                    else if (rotateX < 0) viewer.camera.rotateLeft(-rotateX);
+                if (dx !== 0 || dy !== 0) {
+                    const viewer = viewerRef.current;
+                    if (viewer) {
+                        const rotateX = Cesium.Math.clamp(dx * ROTATE_SENSITIVITY, -MAX_ROTATE_PER_FRAME, MAX_ROTATE_PER_FRAME);
+                        const rotateY = Cesium.Math.clamp(dy * ROTATE_SENSITIVITY, -MAX_ROTATE_PER_FRAME, MAX_ROTATE_PER_FRAME);
 
-                    if (rotateY > 0) viewer.camera.rotateUp(rotateY);
-                    else if (rotateY < 0) viewer.camera.rotateDown(-rotateY);
+                        if (rotateX > 0) viewer.camera.rotateRight(rotateX);
+                        else if (rotateX < 0) viewer.camera.rotateLeft(-rotateX);
+
+                        if (rotateY > 0) viewer.camera.rotateUp(rotateY);
+                        else if (rotateY < 0) viewer.camera.rotateDown(-rotateY);
+                    }
+                    if (onUserInteract) onUserInteract();
                 }
             }
-            lastPalmRef.current = palm;
+            smoothedPalmRef.current = palm;
         } else {
-            lastPalmRef.current = null;
+            smoothedPalmRef.current = null;
             setStatus('tracking'); // camera still on, just no hand visible right now
         }
 
         rafRef.current = requestAnimationFrame(detectLoop);
-    }, [viewerRef]);
+    }, [viewerRef, onUserInteract]);
 
     const start = useCallback(async () => {
         setStatus('loading');
         setErrorMsg('');
+        // Claim manual camera control immediately so the auto-tour carousel doesn't
+        // keep fighting for the Cesium camera while gesture tracking spins up.
+        if (onUserInteract) onUserInteract();
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 }, audio: false });
             streamRef.current = stream;
@@ -106,7 +129,7 @@ export default function HandGestureControl({ viewerRef }) {
             stop();
             setEnabled(false);
         }
-    }, [detectLoop, stop]);
+    }, [detectLoop, stop, onUserInteract]);
 
     useEffect(() => {
         if (enabled) {
