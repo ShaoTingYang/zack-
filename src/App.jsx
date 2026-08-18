@@ -1,20 +1,35 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import Story from './pages/Story';
 import End from './pages/End';
-import CityDetail from './pages/CityDetail';
 
-import EnergyStation from './pages/EnergyStation';
 import { EnergyProvider } from './context/EnergyContext';
 import StarshipWidget from './components/game/StarshipWidget';
 import Navbar from './components/Navbar';
 
-import KeywordsParticle from './components/KeywordsParticle';
-import PinkAnimationHome from './components/PinkAnimationHome';
-import FirstsTimeline from './components/firsts/FirstsTimeline';
-import HeroSection from './components/HeroSection';
-import LettersModule from './components/letters/LettersModule';
 import LettersIcon from './components/letters/LettersIcon';
 import MusicPlayer from './components/MusicPlayer';
+
+// Heavy, view-specific bundles (Cesium globe, three.js scenes, charts) are only
+// downloaded once the tab/page that needs them is actually opened.
+const CityDetail = lazy(() => import('./pages/CityDetail'));
+const EnergyStation = lazy(() => import('./pages/EnergyStation'));
+const KeywordsParticle = lazy(() => import('./components/KeywordsParticle'));
+const PinkAnimationHome = lazy(() => import('./components/PinkAnimationHome'));
+const FirstsTimeline = lazy(() => import('./components/firsts/FirstsTimeline'));
+const HeroSection = lazy(() => import('./components/HeroSection'));
+const LettersModule = lazy(() => import('./components/letters/LettersModule'));
+
+const viewLoadingStyle = {
+  width: '100%',
+  height: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'rgba(255,255,255,0.5)',
+  fontSize: '14px',
+  letterSpacing: '2px'
+};
+const ViewLoading = () => <div style={viewLoadingStyle}>加载中...</div>;
 
 export default function App() {
   const [page, setPage] = useState('home');
@@ -206,29 +221,31 @@ export default function App() {
               )}
 
               <div className="page-content">
-                {activeTab === 'keywords' && !isMobile && (
-                  <div style={{
-                    position: 'relative',
-                    width: '100%',
-                    height: '100vh',
-                    overflow: 'hidden',
-                    backgroundImage: `url(${import.meta.env.BASE_URL}images/Background.jpg)`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
-                  }}>
-                    {/* KeywordsParticle handles its own layering: Canvas at lowest, UI at highest */}
-                    <KeywordsParticle />
+                <Suspense fallback={<ViewLoading />}>
+                  {activeTab === 'keywords' && !isMobile && (
+                    <div style={{
+                      position: 'relative',
+                      width: '100%',
+                      height: '100vh',
+                      overflow: 'hidden',
+                      backgroundImage: `url(${import.meta.env.BASE_URL}images/Background.jpg)`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}>
+                      {/* KeywordsParticle handles its own layering: Canvas at lowest, UI at highest */}
+                      <KeywordsParticle />
 
-                    {/* Middle layer: Interactive planets */}
-                    <div style={{ position: 'absolute', inset: 0, zIndex: 10 }}>
-                      <HeroSection goTo={goTo} />
+                      {/* Middle layer: Interactive planets */}
+                      <div style={{ position: 'absolute', inset: 0, zIndex: 10 }}>
+                        <HeroSection goTo={goTo} />
+                      </div>
                     </div>
-                  </div>
-                )}
-                {activeTab === 'towhere' && <PinkAnimationHome goTo={goTo} goToCity={goToCity} isCityMode={page === 'city'} isMobile={isMobile} />}
-                {activeTab === 'breaking' && <FirstsTimeline />}
-                {activeTab === 'letters' && !isMobile && <LettersModule />}
+                  )}
+                  {activeTab === 'towhere' && <PinkAnimationHome goTo={goTo} goToCity={goToCity} isCityMode={page === 'city'} isMobile={isMobile} />}
+                  {activeTab === 'breaking' && <FirstsTimeline />}
+                  {activeTab === 'letters' && !isMobile && <LettersModule />}
+                </Suspense>
               </div>
               {activeTab === 'keywords' && !isMobile && (
                 <StarshipWidget />
@@ -242,11 +259,17 @@ export default function App() {
           {/* CityDetail renders on top, Globe continues to exist hidden */}
           {page === 'city' && selectedCity && (
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100%', zIndex: 9999, background: 'linear-gradient(135deg, #0a0f1a 0%, #0d1525 40%, #111d35 100%)' }}>
-              <CityDetail cityName={selectedCity} goBack={goBackToGlobe} />
+              <Suspense fallback={<ViewLoading />}>
+                <CityDetail cityName={selectedCity} goBack={goBackToGlobe} />
+              </Suspense>
             </div>
           )}
 
-          {page === 'annual' && <EnergyStation goTo={goTo} />}
+          {page === 'annual' && (
+            <Suspense fallback={<ViewLoading />}>
+              <EnergyStation goTo={goTo} />
+            </Suspense>
+          )}
           <MusicPlayer />
         </div>
       </EnergyProvider>

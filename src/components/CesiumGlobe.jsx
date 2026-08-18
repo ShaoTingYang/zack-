@@ -122,7 +122,7 @@ export default function CesiumGlobe({ goTo, goToCity, transitionMode = false, sc
       // Performance: preload ancestor & sibling tiles for faster city close-ups
       viewer.current.scene.globe.preloadAncestors = true;
       viewer.current.scene.globe.preloadSiblings = true;
-      viewer.current.scene.globe.maximumScreenSpaceError = 1.5;
+      viewer.current.scene.globe.maximumScreenSpaceError = 2; // Cesium default; 1.5 requested noticeably more tiles for imperceptible extra detail at the altitudes this app is viewed from
       viewer.current.scene.globe.tileCacheSize = 1000; // Cache more tiles in memory
 
       // Replace blurry default skybox with custom star particles
@@ -330,8 +330,17 @@ export default function CesiumGlobe({ goTo, goToCity, transitionMode = false, sc
       tick(performance.now());
 
       // ========= Label Occlusion Post-Render Manager =========
-      // Hides overlapping labels to prevent clutter
+      // Hides overlapping labels to prevent clutter.
+      // Throttled: this is O(n^2) with per-entity screen projections, so running it
+      // on literally every rendered frame (up to 60/s) burns CPU for no visible gain
+      // over a few checks per second.
+      let lastLabelOcclusionRun = 0;
+      const LABEL_OCCLUSION_INTERVAL_MS = 100;
       const resolveLabelOcclusion = () => {
+        const now = performance.now();
+        if (now - lastLabelOcclusionRun < LABEL_OCCLUSION_INTERVAL_MS) return;
+        lastLabelOcclusionRun = now;
+
         if (!viewer.current) return;
         const labels = viewer.current.entities.values.filter(e => e.label);
         const screenCoords = [];
