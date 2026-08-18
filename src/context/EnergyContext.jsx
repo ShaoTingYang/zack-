@@ -5,16 +5,18 @@ import { format, subDays, isSameDay, parseISO, differenceInDays } from 'date-fns
 
 const EnergyContext = createContext();
 
+const SHARED_KEYWORDS = ['思考', '积极向上', '不要熬夜', '学习提升', '旅行表现', '迈入婚姻殿堂', '专注'];
+
 export const USERS = {
     JIANG: {
         id: 'jiang',
         name: '杨少霆',
-        keywords: ['专注', '积极向上', '不要熬夜']
+        keywords: SHARED_KEYWORDS
     },
     ZHEN: {
         id: 'zhen',
         name: '方思怡',
-        keywords: ['思考', '学习提升', '旅行表现', '迈入婚姻殿堂']
+        keywords: SHARED_KEYWORDS
     }
 };
 
@@ -141,9 +143,11 @@ export function EnergyProvider({ children }) {
         await supabase.from('keyword_tasks').delete().eq('id', taskId);
     };
 
-    // -- Helper: Calculate Gravity History for a specific user --
+    // -- Helper: Calculate Gravity History for a specific user (or combined, if targetUserId is null) --
     const computeUserGravity = (targetUserId, targetKeywords, allCheckins) => {
-        const userCheckins = allCheckins.filter(c => c.user_id === targetUserId);
+        const userCheckins = targetUserId
+            ? allCheckins.filter(c => c.user_id === targetUserId)
+            : allCheckins;
         const scoresByKeyword = {};
 
         // Start date: 2026-01-01
@@ -185,12 +189,17 @@ export function EnergyProvider({ children }) {
         return scoresByKeyword;
     };
 
-    // -- Algorithm: Calculate Gravity Scores (For Current User UI) --
+    // -- Algorithm: Calculate Gravity Scores, keyed by user, for the Energy Station personal view --
     const gravityScores = useMemo(() => {
-        // Compute gravity for ALL keywords from both users so any planet modal works
-        const jiangScores = computeUserGravity(USERS.JIANG.id, USERS.JIANG.keywords, checkins);
-        const zhenScores = computeUserGravity(USERS.ZHEN.id, USERS.ZHEN.keywords, checkins);
-        return { ...jiangScores, ...zhenScores };
+        return {
+            [USERS.JIANG.id]: computeUserGravity(USERS.JIANG.id, USERS.JIANG.keywords, checkins),
+            [USERS.ZHEN.id]: computeUserGravity(USERS.ZHEN.id, USERS.ZHEN.keywords, checkins)
+        };
+    }, [checkins]);
+
+    // -- Combined gravity per keyword across both users, for the shared planet view --
+    const combinedGravityScores = useMemo(() => {
+        return computeUserGravity(null, SHARED_KEYWORDS, checkins);
     }, [checkins]);
 
     // -- Game: Spacecraft Logic (Hybrid Algorithm + Breakdown) --
@@ -293,6 +302,7 @@ export function EnergyProvider({ children }) {
             checkins,
             addCheckin,
             gravityScores,
+            combinedGravityScores,
             loading,
             starshipState,
             keywordTasks,

@@ -6,34 +6,27 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { format, subDays, startOfWeek, startOfMonth, startOfYear, isSameDay, isAfter } from 'date-fns';
 
 export default function PlanetDetailModal({ keyword, onClose }) {
-    const { PLANET_METADATA, keywordTasks, addKeywordTask, toggleKeywordTask, deleteKeywordTask, checkins, currentUser, gravityScores } = useEnergy();
+    const { PLANET_METADATA, keywordTasks, addKeywordTask, toggleKeywordTask, deleteKeywordTask, checkins, combinedGravityScores } = useEnergy();
     const [newTaskInput, setNewTaskInput] = useState('');
 
     const meta = PLANET_METADATA[keyword] || { en: 'Unknown', desc: 'No description available.' };
 
-    // Determine which user owns this keyword
-    const USERS_LOCAL = {
-        JIANG: { id: 'jiang', keywords: ['专注', '积极向上', '不要熬夜'] },
-        ZHEN: { id: 'zhen', keywords: ['思考', '学习提升', '旅行表现', '迈入婚姻殿堂'] }
-    };
-    const keywordOwner = USERS_LOCAL.JIANG.keywords.includes(keyword) ? 'jiang' : 'zhen';
+    // Every keyword is now shared between both users, so this modal shows the
+    // couple's combined progress on the planet rather than a single owner's.
 
     // -- Data Processing for Chart --
-    // We use the already computed gravityScores from context (which is for currentUser)
     const chartData = useMemo(() => {
-        if (!gravityScores || !gravityScores[keyword]) return [];
-        // Take last 30 days for the chart to keep it readable, or full year? User said "Gravity Trajectory", maybe full year is better but might be flat.
-        // Let's show last 30 days by default or full year if available.
-        return gravityScores[keyword];
-    }, [gravityScores, keyword]);
+        if (!combinedGravityScores || !combinedGravityScores[keyword]) return [];
+        return combinedGravityScores[keyword];
+    }, [combinedGravityScores, keyword]);
 
-    // -- Stats Calculation --
+    // -- Stats Calculation (both users combined) --
     const stats = useMemo(() => {
         const today = new Date();
-        const userCheckins = checkins.filter(c => c.user_id === keywordOwner && c.keyword === keyword);
+        const keywordCheckins = checkins.filter(c => c.keyword === keyword);
 
         const calcPeriod = (startDate) => {
-            return userCheckins.filter(c => isAfter(new Date(c.date), startDate)).length;
+            return keywordCheckins.filter(c => isAfter(new Date(c.date), startDate)).length;
         }
 
         return {
@@ -41,11 +34,11 @@ export default function PlanetDetailModal({ keyword, onClose }) {
             month: calcPeriod(startOfMonth(today)),
             year: calcPeriod(startOfYear(today))
         };
-    }, [checkins, keywordOwner, keyword]);
+    }, [checkins, keyword]);
 
 
-    // -- Tasks --
-    const tasks = keywordTasks.filter(t => t.keyword === keyword && t.user_id === keywordOwner);
+    // -- Tasks (both users' sub-tasks for this keyword) --
+    const tasks = keywordTasks.filter(t => t.keyword === keyword);
 
     const handleAddTask = (e) => {
         if (e.key === 'Enter' && newTaskInput.trim()) {

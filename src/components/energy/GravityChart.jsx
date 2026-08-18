@@ -6,19 +6,21 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 const COLORS = ['#6BCB77', '#FFD93D', '#FF4B4B', '#4ECDC4', '#C7F464', '#FF6B6B', '#4D96FF'];
 
 export default function GravityChart() {
-    const { gravityScores, userInfo } = useEnergy();
+    const { gravityScores, userInfo, currentUser } = useEnergy();
 
     // Transform data for Recharts
     // Need format: [{ date: '2026-01-01', keyword1: 50, keyword2: 60 }, ...]
 
+    const userGravity = gravityScores[currentUser] || {};
+
     // 1. Get all dates from the first keyword (assuming all have same dates)
     const firstKw = userInfo.keywords[0];
-    const history = gravityScores[firstKw] || [];
+    const history = userGravity[firstKw] || [];
 
     const chartData = history.map((h, index) => {
         const row = { date: h.date };
         userInfo.keywords.forEach(kw => {
-            const kwHistory = gravityScores[kw];
+            const kwHistory = userGravity[kw];
             if (kwHistory && kwHistory[index]) {
                 row[kw] = kwHistory[index].score;
             }
