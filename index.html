@@ -10,6 +10,34 @@
 
 <body>
   <div id="root"></div>
+  <script>
+    (function () {
+      var OriginalHeaders = window.Headers;
+      window.Headers = function (init) {
+        try {
+          return new OriginalHeaders(init);
+        } catch (err) {
+          var detail;
+          try { detail = JSON.stringify(init); } catch (e) { detail = String(init); }
+          console.error('[HEADER DEBUG] Headers() failed. init =', detail, err);
+          try { alert('调试信息 - 请求头构造失败:\n' + detail); } catch (e) { }
+          throw err;
+        }
+      };
+      window.Headers.prototype = OriginalHeaders.prototype;
+
+      var originalSet = OriginalHeaders.prototype.set;
+      OriginalHeaders.prototype.set = function (name, value) {
+        try {
+          return originalSet.call(this, name, value);
+        } catch (err) {
+          console.error('[HEADER DEBUG] headers.set() failed. name =', name, 'value =', value, err);
+          try { alert('调试信息 - 设置请求头失败:\n名称: ' + name + '\n值: ' + String(value).slice(0, 300)); } catch (e) { }
+          throw err;
+        }
+      };
+    })();
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

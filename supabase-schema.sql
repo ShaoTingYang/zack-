@@ -132,6 +132,13 @@ CREATE POLICY "Allow all access to towhere_logs" ON towhere_logs
 -- 如果你仍需使用 Supabase Storage 存储图片：
 -- 1. 在 Supabase Dashboard -> Storage 中创建名为 "firsts-images" 的 Bucket
 -- 2. 设置为 Public bucket
--- 3. 添加 RLS 策略允许匿名上传和读取
+-- 3. 添加 RLS 策略允许匿名上传和读取（Public bucket 只影响读取，写入必须单独授权）：
+--
+-- CREATE POLICY "Allow anon upload to firsts-images" ON storage.objects
+--     FOR INSERT WITH CHECK (bucket_id = 'firsts-images');
+-- CREATE POLICY "Allow anon read firsts-images" ON storage.objects
+--     FOR SELECT USING (bucket_id = 'firsts-images');
+-- CREATE POLICY "Allow anon delete firsts-images" ON storage.objects
+--     FOR DELETE USING (bucket_id = 'firsts-images');
 --
 -- 如果使用 GitHub 存储图片则不需要创建此 Bucket
