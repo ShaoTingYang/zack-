@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-const LetterPaper = ({ letter, onClose }) => {
+const LetterPaper = ({ letter, onClose, onDelete }) => {
     const [displayedText, setDisplayedText] = useState('');
 
     useEffect(() => {
@@ -44,6 +44,15 @@ const LetterPaper = ({ letter, onClose }) => {
                 title="点击即可跳过打字动画"
             >
                 <button className="close-letter-btn" onClick={onClose}>&times;</button>
+                {onDelete && (
+                    <button
+                        className="delete-letter-btn"
+                        onClick={(e) => { e.stopPropagation(); onDelete(letter.id); }}
+                        title="删除这封信"
+                    >
+                        删除
+                    </button>
+                )}
                 <div className="letter-header">
                     <div className="letter-recipient">To. {letter.recipient || '...'}</div>
                 </div>

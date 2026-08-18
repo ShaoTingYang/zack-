@@ -429,6 +429,25 @@
     cursor: pointer;
 }
 
+.delete-letter-btn {
+    position: absolute;
+    top: 22px;
+    right: 60px;
+    background: transparent;
+    border: 1px solid rgba(141, 110, 99, 0.4);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 13px;
+    color: #8d6e63;
+    cursor: pointer;
+}
+
+.delete-letter-btn:hover {
+    background: #e53935;
+    border-color: #e53935;
+    color: #fff;
+}
+
 .letter-header {
     margin-bottom: 30px;
     border-bottom: 1px dashed #d7ccc8;

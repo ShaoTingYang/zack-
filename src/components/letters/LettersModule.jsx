@@ -119,6 +119,25 @@ const LettersModule = () => {
         }
     };
 
+    const handleDeleteLetter = async (letterId) => {
+        if (!window.confirm('确定要删除这封信吗？删除后无法恢复。')) return;
+
+        try {
+            const { error } = await supabase
+                .from('letters')
+                .delete()
+                .eq('id', letterId);
+
+            if (error) throw error;
+            setViewState('stack');
+            setSelectedLetter(null);
+            await fetchLetters();
+        } catch (error) {
+            console.error('Error deleting letter:', error);
+            alert(`删除失败: ${error.message}`);
+        }
+    };
+
     const handleDeleteDraft = async (e, draftId) => {
         e.stopPropagation();
         if (!window.confirm('确定要删除这张稿纸吗？')) return;
@@ -216,6 +235,7 @@ const LettersModule = () => {
                             key="reading"
                             letter={selectedLetter}
                             onClose={handleCloseLetter}
+                            onDelete={handleDeleteLetter}
                         />
                     )}
 
