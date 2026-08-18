@@ -3,9 +3,14 @@
  * Handles token management (localStorage) and file uploads to the GitHub repo.
  */
 
-const OWNER = import.meta.env.VITE_GITHUB_OWNER;
-const REPO = import.meta.env.VITE_GITHUB_REPO;
-const BRANCH = import.meta.env.VITE_GITHUB_BRANCH || 'main';
+// Strip stray BOM (U+FEFF) / zero-width space (U+200B) characters that some
+// env-var tooling can silently inject, which otherwise breaks the browser's
+// Headers API with a non-ISO-8859-1 error.
+const cleanEnvValue = (value) => (value || '').replace(/[﻿​]/g, '').trim();
+
+const OWNER = cleanEnvValue(import.meta.env.VITE_GITHUB_OWNER);
+const REPO = cleanEnvValue(import.meta.env.VITE_GITHUB_REPO);
+const BRANCH = cleanEnvValue(import.meta.env.VITE_GITHUB_BRANCH) || 'main';
 const TOKEN_KEY = 'towhere_github_token';
 
 // Fallback to .env token if localStorage is empty

@@ -10,58 +10,6 @@
 
 <body>
   <div id="root"></div>
-  <script>
-    (function () {
-      var shown = false;
-      function describeBadString(s) {
-        var lines = [];
-        lines.push('length=' + s.length);
-        var badSpots = [];
-        for (var i = 0; i < s.length; i++) {
-          var code = s.charCodeAt(i);
-          if (code > 255) badSpots.push(i + ':U+' + code.toString(16).toUpperCase());
-        }
-        lines.push('out-of-range indices=' + (badSpots.length ? badSpots.join(',') : 'NONE (all chars are ASCII/Latin1 - value itself may be fine, error may be elsewhere)'));
-        lines.push('full char codes=' + Array.prototype.map.call(s, function (c) { return c.charCodeAt(0); }).join(','));
-        return lines.join('\n');
-      }
-      function showDebugPanel(text) {
-        if (shown) return; // only show the first one to avoid spamming
-        shown = true;
-        var pre = document.createElement('textarea');
-        pre.readOnly = true;
-        pre.value = text;
-        pre.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;height:60vh;z-index:999999;background:#111;color:#0f0;font-family:monospace;font-size:12px;padding:10px;white-space:pre-wrap;border:2px solid red;';
-        document.body.appendChild(pre);
-        pre.focus();
-        pre.select();
-      }
-      var OriginalHeaders = window.Headers;
-      window.Headers = function (init) {
-        try {
-          return new OriginalHeaders(init);
-        } catch (err) {
-          var detail;
-          try { detail = JSON.stringify(init); } catch (e) { detail = String(init); }
-          console.error('[HEADER DEBUG] Headers() failed. init =', detail, err);
-          showDebugPanel('Headers() 构造失败\ninit=' + detail);
-          throw err;
-        }
-      };
-      window.Headers.prototype = OriginalHeaders.prototype;
-
-      var originalSet = OriginalHeaders.prototype.set;
-      OriginalHeaders.prototype.set = function (name, value) {
-        try {
-          return originalSet.call(this, name, value);
-        } catch (err) {
-          console.error('[HEADER DEBUG] headers.set() failed. name =', name, 'value =', value, err);
-          showDebugPanel('headers.set() 失败\nname=' + name + '\n' + describeBadString(String(value)));
-          throw err;
-        }
-      };
-    })();
-  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 
