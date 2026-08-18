@@ -8,6 +8,7 @@ export default function CityUploadPanel({ onBack, onCityCreated }) {
     const [cityName, setCityName] = useState('');
     const [visitDate, setVisitDate] = useState('');
     const [departure, setDeparture] = useState('');
+    const [summary, setSummary] = useState('');
     const [lng, setLng] = useState('');
     const [lat, setLat] = useState('');
     const [images, setImages] = useState([]); // { id, file, preview, status, progress, cdnUrl }
@@ -113,6 +114,7 @@ export default function CityUploadPanel({ onBack, onCityCreated }) {
         setLng(city.lng || '');
         setLat(city.lat || '');
         setDeparture(city.departure || '');
+        setSummary(city.summary || '');
 
         const { data: imgData } = await supabase
             .from('city_images')
@@ -135,6 +137,7 @@ export default function CityUploadPanel({ onBack, onCityCreated }) {
         setCityName('');
         setVisitDate('');
         setDeparture('');
+        setSummary('');
         setLng('');
         setLat('');
         setImages([]);
@@ -192,6 +195,7 @@ export default function CityUploadPanel({ onBack, onCityCreated }) {
                 lng: parseFloat(lng),
                 lat: parseFloat(lat),
                 departure: departure.trim() || null,
+                summary: summary.trim() || null,
             };
 
             let currentCityId = editingCityId;
@@ -337,6 +341,17 @@ export default function CityUploadPanel({ onBack, onCityCreated }) {
                                 <label style={labelStyle}>出发地</label>
                                 <input value={departure} onChange={e => setDeparture(e.target.value)} style={inputStyle} placeholder="深圳" />
                             </div>
+                        </div>
+
+                        <div style={{ marginTop: '20px' }}>
+                            <label style={labelStyle}>旅行总结/日记</label>
+                            <textarea
+                                value={summary}
+                                onChange={e => setSummary(e.target.value)}
+                                style={textareaStyle}
+                                placeholder="写下这趟旅行的回忆、感想..."
+                                rows={5}
+                            />
                         </div>
                     </div>
 
@@ -550,6 +565,7 @@ const sectionCardStyle = {
 const sectionTitleStyle = { margin: '0 0 20px 0', fontSize: '1rem', fontWeight: 700, opacity: 0.9, letterSpacing: '0.5px', textTransform: 'uppercase' };
 const labelStyle = { display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: '8px', marginLeft: '4px' };
 const inputStyle = { width: '100%', padding: '14px 18px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', color: 'white', outline: 'none', fontSize: '1rem', transition: 'border-color 0.2s', boxSizing: 'border-box' };
+const textareaStyle = { ...inputStyle, resize: 'vertical', minHeight: '100px', fontFamily: 'inherit', lineHeight: 1.6 };
 const formGridStyle = { display: 'flex', gap: '20px' };
 const addImageButtonStyle = { padding: '8px 16px', borderRadius: '12px', border: 'none', background: '#667eea', color: 'white', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' };
 

@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS cities (
     lat DOUBLE PRECISION,
     color TEXT,
     departure TEXT,
+    summary TEXT,
     sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -140,5 +141,12 @@ CREATE POLICY "Allow all access to towhere_logs" ON towhere_logs
 --     FOR SELECT USING (bucket_id = 'firsts-images');
 -- CREATE POLICY "Allow anon delete firsts-images" ON storage.objects
 --     FOR DELETE USING (bucket_id = 'firsts-images');
+
+-- ============================================
+-- 迁移：为已存在的数据库添加 cities.summary 字段
+-- 2026-08-18：地点编辑面板新增"旅行总结/日记"栏位
+-- 在 Supabase SQL Editor 里运行一次即可（对已有数据库是安全的，字段已存在则跳过）：
+-- ============================================
+ALTER TABLE cities ADD COLUMN IF NOT EXISTS summary TEXT;
 --
 -- 如果使用 GitHub 存储图片则不需要创建此 Bucket

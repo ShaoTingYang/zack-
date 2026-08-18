@@ -8,7 +8,7 @@ export default function CityDetail({ cityName, goBack }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [currentCity, setCurrentCity] = useState({ mainImage: '', description: '', gallery: [] });
+  const [currentCity, setCurrentCity] = useState({ mainImage: '', description: '', summary: '', gallery: [] });
 
   // 从 Supabase 加载城市数据
   useEffect(() => {
@@ -47,6 +47,7 @@ export default function CityDetail({ cityName, goBack }) {
           id: cityData.id,
           mainImage: cityData.main_image,
           description: cityData.description || '',
+          summary: cityData.summary || '',
           departure: cityData.departure || '',
           lng: cityData.lng,
           lat: cityData.lat,
@@ -184,6 +185,16 @@ export default function CityDetail({ cityName, goBack }) {
           </svg>
         </div>
       </div>
+
+      {/* 旅行总结/日记 */}
+      {currentCity.summary && (
+        <div className="summary-section">
+          <div className="summary-container">
+            <h2 className="summary-title">旅行总结</h2>
+            <p className="summary-text">{currentCity.summary}</p>
+          </div>
+        </div>
+      )}
 
       {/* 图片流区域 */}
       <div className="gallery-section">
@@ -374,6 +385,31 @@ export default function CityDetail({ cityName, goBack }) {
           margin-bottom: 8px;
           font-size: 14px;
           opacity: 0.8;
+        }
+
+        .summary-section {
+          background: white;
+          padding: 80px 0 0;
+        }
+
+        .summary-container {
+          max-width: 720px;
+          margin: 0 auto;
+          padding: 0 40px;
+        }
+
+        .summary-title {
+          font-size: 2rem;
+          text-align: center;
+          margin-bottom: 30px;
+          color: #333;
+        }
+
+        .summary-text {
+          font-size: 1.1rem;
+          line-height: 1.9;
+          color: #555;
+          white-space: pre-wrap;
         }
 
         .gallery-section {
